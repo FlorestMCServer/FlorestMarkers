@@ -6,6 +6,9 @@ main: ru.florestdev.florestMarkers.FlorestMarkers
 api-version: '1.21'
 load: STARTUP
 
+depend:
+  - BlueMap
+
 authors: [ FlorestDEV ]
 commands:
   map:
