@@ -1,0 +1,18 @@
+name: FlorestMarkers
+prefix: RTPOnDown
+version: '1.0-SNAPSHOT'
+
+main: ru.florestdev.florestMarkers.FlorestMarkers
+api-version: '1.21'
+load: STARTUP
+
+authors: [ FlorestDEV ]
+commands:
+  map:
+    permission: markers.add
+
+permissions:
+  markers.add:
+    default: op
+
+folia-supported: true
