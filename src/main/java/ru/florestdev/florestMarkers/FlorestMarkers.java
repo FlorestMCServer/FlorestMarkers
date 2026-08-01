@@ -70,7 +70,6 @@ public class FlorestMarkers extends JavaPlugin implements CommandExecutor {
         String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         Location loc = player.getLocation();
 
-        // Сохраняем в плоскую структуру (пока без вложенности)
         String path = name;
         data.set(path + ".world", loc.getWorld().getName());
         data.set(path + ".x", loc.getX());
@@ -92,11 +91,17 @@ public class FlorestMarkers extends JavaPlugin implements CommandExecutor {
         ConfigurationSection root = data.getRoot();
         if (root == null) return;
 
-        // Проходим по всем корневым ключам и начинаем рекурсивный обход
+        // Проходим по всем корневым ключам
         for (String key : root.getKeys(false)) {
             Object obj = root.get(key);
-            if (obj instanceof ConfigurationSection) {
-                traverseSection((ConfigurationSection) obj, key);
+            if (obj instanceof ConfigurationSection section) {
+                // Проверяем, является ли сама секция конечной точкой
+                if (isMarkerSection(section)) {
+                    addMarkerFromSection(key, section);
+                } else {
+                    // Иначе идём глубже
+                    traverseSection(section, key);
+                }
             }
         }
     }
@@ -107,19 +112,25 @@ public class FlorestMarkers extends JavaPlugin implements CommandExecutor {
             Object obj = section.get(key);
 
             if (obj instanceof ConfigurationSection subSection) {
-                // Если внутри есть world, x, y, z — это конечная точка
-                if (subSection.contains("world") && subSection.contains("x") && subSection.contains("y") && subSection.contains("z")) {
-                    String world = subSection.getString("world");
-                    double x = subSection.getDouble("x");
-                    double y = subSection.getDouble("y");
-                    double z = subSection.getDouble("z");
-                    addMarker(fullPath, world, x, y, z);
+                if (isMarkerSection(subSection)) {
+                    addMarkerFromSection(fullPath, subSection);
                 } else {
-                    // Иначе углубляемся дальше
                     traverseSection(subSection, fullPath);
                 }
             }
         }
+    }
+
+    private boolean isMarkerSection(ConfigurationSection section) {
+        return section.contains("world") && section.contains("x") && section.contains("y") && section.contains("z");
+    }
+
+    private void addMarkerFromSection(String name, ConfigurationSection section) {
+        String world = section.getString("world");
+        double x = section.getDouble("x");
+        double y = section.getDouble("y");
+        double z = section.getDouble("z");
+        addMarker(name, world, x, y, z);
     }
 
     // ======================= ДОБАВЛЕНИЕ МАРКЕРА В BLUEMAP =======================
